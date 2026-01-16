@@ -85,24 +85,7 @@ export const SeoHtmlGenerator: React.FC = () => {
 
   <body>
     <div id="root"></div>
-    <script type="module">
-      (async () => {
-        const candidates = ["/src/main.tsx", "/assets/app.js"]; // dev → prod
-        for (const src of candidates) {
-          try {
-            const res = await fetch(src, { method: "HEAD" });
-            if (!res.ok) continue;
-            const s = document.createElement("script");
-            s.type = "module";
-            s.src = src;
-            document.body.appendChild(s);
-            return;
-          } catch {
-            // ignore
-          }
-        }
-      })();
-    </script>
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>`;
   };
