@@ -1,0 +1,451 @@
+/* ============================================================
+   СТИЛИ САЙТА - РЕДАКТИРУЙТЕ ЭТОТ ФАЙЛ ДЛЯ ИЗМЕНЕНИЯ ДИЗАЙНА
+   ============================================================ */
+
+/* Общие стили */
+:root {
+  --primary: #007bff;
+  --primary-dark: #0056b3;
+  --primary-darker: #003f7f;
+  --accent: #4476fa;
+  --text-dark: #333;
+  --text-light: #555;
+  --bg-light: #f8f9fa;
+  --bg-white: #ffffff;
+  --bg-gray: #e9ecef;
+  --bg-dark: #343a40;
+  --border-radius: 5px;
+  --shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 4px 4px 15px rgba(0, 0, 0, 0.2);
+  --max-width: 800px;
+  --font-main: Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* Header */
+.site-header {
+  text-align: center;
+  padding: 20px;
+  background-color: var(--primary);
+  color: white;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.4;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .site-header h1 {
+    font-size: 18px;
+  }
+}
+
+/* Навигация */
+.site-nav {
+  display: flex;
+  justify-content: center;
+  background-color: var(--primary-dark);
+  padding: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.site-nav a {
+  color: white;
+  text-decoration: none;
+  padding: 10px 15px;
+  margin: 0 10px;
+  border-radius: var(--border-radius);
+  transition: background 0.3s;
+}
+
+.site-nav a:hover {
+  background-color: var(--primary-darker);
+}
+
+/* Контейнер основного контента */
+.main-content {
+  max-width: var(--max-width);
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+}
+
+/* Блок автора */
+.author-box {
+  max-width: var(--max-width);
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.author-box img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.author-info h2 {
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.author-info h2 a {
+  text-decoration: none;
+  color: var(--primary-dark);
+  font-weight: bold;
+}
+
+.author-info h2 a:hover {
+  color: var(--primary-darker);
+}
+
+.author-info p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+@media (max-width: 600px) {
+  .author-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+/* Дата обновления */
+.update-date {
+  max-width: var(--max-width);
+  margin: 10px auto 20px;
+  padding: 10px;
+  background: var(--bg-gray);
+  color: var(--text-dark);
+  font-size: 14px;
+  text-align: center;
+  border-radius: var(--border-radius);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Заголовки h2 с подсветкой */
+.section-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  background-size: 1em .4em;
+  background-repeat: repeat-x;
+  background-position: 0 70%;
+  background-image: linear-gradient(90deg, rgba(190, 214, 90, .5), rgba(190, 214, 90, .5));
+  word-break: break-word;
+  padding: 5px 0;
+  display: inline-block;
+  text-transform: none;
+  letter-spacing: normal;
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+/* Таблица курсов */
+.courses-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.courses-table th,
+.courses-table td {
+  padding: 12px;
+  border: 1px solid #000;
+  text-align: left;
+  font-size: 14px;
+}
+
+.courses-table th {
+  background-color: var(--bg-gray);
+  font-weight: bold;
+}
+
+.courses-table a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.courses-table a:hover {
+  text-decoration: underline;
+}
+
+/* Кнопка "Перейти" */
+.btn-link {
+  display: inline-block;
+  padding: 8px 20px;
+  background: linear-gradient(90deg, #4f8cff 0%, #2e6cff 100%);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+  white-space: nowrap;
+}
+
+.btn-link:hover {
+  background: linear-gradient(90deg, #2e6cff 0%, #1565c0 100%);
+  transform: scale(1.04);
+  box-shadow: 0 4px 20px 0 rgba(44, 62, 80, 0.13);
+}
+
+/* Мобильная адаптация таблицы */
+@media (max-width: 768px) {
+  .courses-table,
+  .courses-table thead,
+  .courses-table tbody,
+  .courses-table th,
+  .courses-table td,
+  .courses-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .courses-table thead {
+    display: none;
+  }
+
+  .courses-table tr {
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: var(--bg-white);
+  }
+
+  .courses-table td {
+    position: relative;
+    padding-left: 50%;
+    text-align: left;
+    min-height: 45px;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .courses-table td:last-child {
+    border-bottom: none;
+  }
+
+  .courses-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 10px;
+    top: 12px;
+    font-weight: bold;
+    width: 45%;
+  }
+}
+
+/* Блок курса */
+.course-block {
+  max-width: var(--max-width);
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+}
+
+.course-block img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  display: block;
+  margin: 15px auto;
+  box-shadow: var(--shadow-hover);
+}
+
+.course-block h2 {
+  font-size: 22px;
+  color: #000;
+  margin-bottom: 15px;
+}
+
+.course-block h3 {
+  font-size: 18px;
+  color: var(--text-dark);
+  margin: 20px 0 10px;
+}
+
+.course-block ul {
+  padding-left: 20px;
+}
+
+.course-block li {
+  margin-bottom: 8px;
+}
+
+.course-block .rating {
+  font-size: 16px;
+  color: var(--accent);
+  margin: 10px 0;
+}
+
+/* Кнопка курса */
+.course-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  margin-top: 20px;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.course-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+/* FAQ секция */
+.faq-section {
+  max-width: var(--max-width);
+  margin: 20px auto;
+  padding: 20px;
+  background: var(--bg-white);
+  box-shadow: var(--shadow);
+  border-radius: var(--border-radius);
+}
+
+.faq-section h2 {
+  font-size: 22px;
+  color: var(--primary-dark);
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.faq-item {
+  margin-bottom: 15px;
+  padding: 15px;
+  background: #f1f1f1;
+  border-radius: var(--border-radius);
+}
+
+.faq-item h3 {
+  font-size: 16px;
+  margin: 0 0 10px 0;
+  color: var(--text-dark);
+}
+
+.faq-item p {
+  font-size: 14px;
+  color: var(--text-light);
+  margin: 0 0 10px 0;
+}
+
+.faq-item ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.faq-item li {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+/* Кнопка "Наверх" */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s, background-color 0.3s;
+}
+
+.scroll-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scroll-top-btn:hover {
+  background: var(--primary-dark);
+}
+
+/* Футер */
+.site-footer {
+  background-color: var(--bg-dark);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.site-footer p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.site-footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  color: var(--primary-dark);
+}
+
+/* Вступительный текст */
+.intro-text {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-dark);
+  margin-bottom: 20px;
+}
+
+/* Дополнительные утилиты */
+.text-center {
+  text-align: center;
+}
+
+.mb-20 {
+  margin-bottom: 20px;
+}
+
+.mt-20 {
+  margin-top: 20px;
+}
