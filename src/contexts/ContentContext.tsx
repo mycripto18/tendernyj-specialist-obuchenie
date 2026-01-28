@@ -367,6 +367,28 @@ const exportJSON = (pageSlug?: string): string => {
     }
   };
 
+  // Функция для сохранения существующих изображений при импорте
+  const mergeCoursesWithExistingImages = (newCourses: Course[], existingCourses: Course[]): Course[] => {
+    return newCourses.map(newCourse => {
+      const existingCourse = existingCourses.find(c => c.id === newCourse.id);
+      if (!existingCourse) return newCourse;
+      
+      return {
+        ...newCourse,
+        // Сохраняем существующий schoolLogo если новый пустой
+        schoolLogo: newCourse.schoolLogo || existingCourse.schoolLogo || '',
+      };
+    });
+  };
+
+  const mergeAuthorWithExistingImage = (newAuthor: Author, existingAuthor: Author): Author => {
+    return {
+      ...newAuthor,
+      // Сохраняем существующее фото если новое пустое
+      photo: newAuthor.photo || existingAuthor.photo || '',
+    };
+  };
+
   const importJSON = (json: string, pageSlug?: string): boolean => {
     try {
       const parsed = JSON.parse(json);
@@ -376,14 +398,63 @@ const exportJSON = (pageSlug?: string): string => {
         if (!parsed.pageTitle && !parsed.pages) {
           throw new Error('Неверная структура JSON для полного сайта');
         }
-        setContentState({ ...getDefaultContent(), ...parsed });
+        
+        // Мержим курсы с сохранением существующих изображений
+        const mergedCourses = parsed.courses 
+          ? mergeCoursesWithExistingImages(parsed.courses, content.courses)
+          : content.courses;
+        
+        // Мержим автора с сохранением фото
+        const mergedAuthor = parsed.author 
+          ? mergeAuthorWithExistingImage(parsed.author, content.author)
+          : content.author;
+        
+        // Мержим страницы с сохранением изображений
+        const mergedPages = parsed.pages 
+          ? parsed.pages.map((newPage: SitePage) => {
+              const existingPage = content.pages.find(p => p.slug === newPage.slug);
+              if (!existingPage) return newPage;
+              
+              return {
+                ...newPage,
+                courses: newPage.courses 
+                  ? mergeCoursesWithExistingImages(newPage.courses, existingPage.courses || [])
+                  : existingPage.courses,
+                author: newPage.author && existingPage.author
+                  ? mergeAuthorWithExistingImage(newPage.author, existingPage.author)
+                  : newPage.author || existingPage.author,
+              };
+            })
+          : content.pages;
+        
+        setContentState({ 
+          ...getDefaultContent(), 
+          ...parsed, 
+          courses: mergedCourses,
+          author: mergedAuthor,
+          pages: mergedPages,
+        });
       } else if (pageSlug === 'main' || !pageSlug) {
         // Импорт на главную страницу
         if (!parsed.pageTitle || !parsed.metaData || !parsed.courses) {
           throw new Error('Неверная структура JSON для главной страницы');
         }
+        
+        // Мержим курсы и автора с сохранением изображений
+        const mergedCourses = mergeCoursesWithExistingImages(parsed.courses, content.courses);
+        const mergedAuthor = parsed.author 
+          ? mergeAuthorWithExistingImage(parsed.author, content.author)
+          : content.author;
+        
         // Сохраняем pages и navigation
-        setContentState({ ...getDefaultContent(), ...parsed, pages: content.pages, navigation: content.navigation });
+        setContentState({ 
+          ...getDefaultContent(), 
+          ...parsed, 
+          courses: mergedCourses,
+          author: mergedAuthor,
+          pages: content.pages, 
+          navigation: content.navigation 
+        });
       } else {
         // Импорт на конкретную страницу
         const pageIndex = content.pages.findIndex(p => p.slug === pageSlug);
@@ -391,16 +462,43 @@ const exportJSON = (pageSlug?: string): string => {
           throw new Error('Страница не найдена');
         }
         
+        const existingPage = content.pages[pageIndex];
+        
         // Проверяем, это полная страница или контент
         if (parsed.slug && parsed.blocks) {
           // Это полная страница
           const newPages = [...content.pages];
-          newPages[pageIndex] = { ...newPages[pageIndex], ...parsed, slug: pageSlug };
+          
+          // Мержим курсы с сохранением изображений
+          const mergedCourses = parsed.courses 
+            ? mergeCoursesWithExistingImages(parsed.courses, existingPage.courses || [])
+            : existingPage.courses;
+          
+          const mergedAuthor = parsed.author && existingPage.author
+            ? mergeAuthorWithExistingImage(parsed.author, existingPage.author)
+            : parsed.author || existingPage.author;
+          
+          newPages[pageIndex] = { 
+            ...newPages[pageIndex], 
+            ...parsed, 
+            slug: pageSlug,
+            courses: mergedCourses,
+            author: mergedAuthor,
+          };
           setContentState({ ...content, pages: newPages });
         } else if (parsed.pageTitle || parsed.courses) {
           // Это контент как на главной, применяем к странице
-          // ПОЛНОСТЬЮ заменяем курсы из JSON (не мержим со старыми)
           const newPages = [...content.pages];
+          
+          // Мержим курсы с сохранением изображений
+          const mergedCourses = parsed.courses 
+            ? mergeCoursesWithExistingImages(parsed.courses, existingPage.courses || [])
+            : existingPage.courses || [];
+          
+          const mergedAuthor = parsed.author && existingPage.author
+            ? mergeAuthorWithExistingImage(parsed.author, existingPage.author)
+            : parsed.author || existingPage.author;
+          
           // Если есть metaData в JSON - полностью заменяем, иначе мержим поля
           const newMetaData = parsed.metaData ? {
             title: parsed.metaData.title || newPages[pageIndex].metaData.title,
@@ -412,11 +510,11 @@ const exportJSON = (pageSlug?: string): string => {
           newPages[pageIndex] = {
             ...newPages[pageIndex],
             pageTitle: parsed.pageTitle || newPages[pageIndex].pageTitle,
-            author: parsed.author || newPages[pageIndex].author,
+            author: mergedAuthor,
             headerStats: parsed.headerStats || newPages[pageIndex].headerStats,
             introText: parsed.introText || newPages[pageIndex].introText,
             beforeTableBlock: parsed.beforeTableBlock || newPages[pageIndex].beforeTableBlock,
-            courses: parsed.courses || [], // Полная замена курсов
+            courses: mergedCourses,
             contentBlocks: parsed.contentBlocks || newPages[pageIndex].contentBlocks,
             faqData: parsed.faqData || newPages[pageIndex].faqData,
             metaData: newMetaData
