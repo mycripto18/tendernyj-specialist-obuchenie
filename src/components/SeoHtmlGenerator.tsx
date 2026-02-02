@@ -17,6 +17,23 @@ import {
   Lightbulb
 } from 'lucide-react';
 
+// Функция для очистки HTML-тегов из текста
+const stripHtml = (html: string): string => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '').trim();
+};
+
+// Функция для экранирования HTML-сущностей
+const escapeHtml = (text: string): string => {
+  if (!text) return '';
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 export const SeoHtmlGenerator: React.FC = () => {
   const { content } = useContent();
   const [copied, setCopied] = useState<string | null>(null);
@@ -39,11 +56,192 @@ export const SeoHtmlGenerator: React.FC = () => {
     toast.success(`Файл ${filename} скачан`);
   };
 
+  // Генерация статического контента для SEO (видимого ботам)
+  const generateStaticContent = (isMainPage: boolean, pageData?: typeof content.pages[0]) => {
+    let staticHtml = '';
+    
+    if (isMainPage) {
+      // Главная страница - полный контент
+      
+      // Заголовок
+      staticHtml += `    <h1>${escapeHtml(content.pageTitle || '')}</h1>\n`;
+      
+      // Автор
+      if (content.author?.name) {
+        staticHtml += `    <p>Автор: ${escapeHtml(content.author.name)}</p>\n`;
+        if (content.author.description) {
+          staticHtml += `    <p>${escapeHtml(content.author.description)}</p>\n`;
+        }
+      }
+      
+      // Вступительный текст
+      if (content.introText) {
+        staticHtml += `    <article>${escapeHtml(stripHtml(content.introText))}</article>\n`;
+      }
+      
+      // Блок перед таблицей
+      if (content.beforeTableBlock) {
+        if (content.beforeTableBlock.title) {
+          staticHtml += `    <h2>${escapeHtml(content.beforeTableBlock.title)}</h2>\n`;
+        }
+        if (content.beforeTableBlock.paragraphs && content.beforeTableBlock.paragraphs.length > 0) {
+          content.beforeTableBlock.paragraphs.forEach(p => {
+            staticHtml += `    <p>${escapeHtml(stripHtml(p))}</p>\n`;
+          });
+        }
+      }
+      
+      // Курсы
+      if (content.courses && content.courses.length > 0) {
+        staticHtml += `    <h2>Курсы</h2>\n    <ul>\n`;
+        content.courses.forEach((course, index) => {
+          staticHtml += `      <li>\n`;
+          staticHtml += `        <h3>${index + 1}. ${escapeHtml(course.title || '')}</h3>\n`;
+          staticHtml += `        <p>Школа: ${escapeHtml(course.school || '')}</p>\n`;
+          if (course.price) {
+            staticHtml += `        <p>Цена: ${escapeHtml(String(course.price))} руб.</p>\n`;
+          }
+          if (course.duration) {
+            staticHtml += `        <p>Длительность: ${escapeHtml(course.duration)}</p>\n`;
+          }
+          if (course.features && course.features.length > 0) {
+            staticHtml += `        <ul>\n`;
+            course.features.forEach(feature => {
+              if (feature) {
+                staticHtml += `          <li>${escapeHtml(stripHtml(feature))}</li>\n`;
+              }
+            });
+            staticHtml += `        </ul>\n`;
+          }
+          if (course.advantages && course.advantages.length > 0) {
+            staticHtml += `        <p>Преимущества: ${escapeHtml(course.advantages.join(', '))}</p>\n`;
+          }
+          staticHtml += `      </li>\n`;
+        });
+        staticHtml += `    </ul>\n`;
+      }
+      
+      // Контентные блоки
+      if (content.contentBlocks && content.contentBlocks.length > 0) {
+        content.contentBlocks.forEach(block => {
+          if (block.title) {
+            staticHtml += `    <h2>${escapeHtml(block.title)}</h2>\n`;
+          }
+          if (block.paragraphs && block.paragraphs.length > 0) {
+            block.paragraphs.forEach(p => {
+              staticHtml += `    <p>${escapeHtml(stripHtml(p))}</p>\n`;
+            });
+          }
+        });
+      }
+      
+      // FAQ
+      if (content.faqData && content.faqData.length > 0) {
+        staticHtml += `    <h2>Часто задаваемые вопросы</h2>\n`;
+        content.faqData.forEach(faq => {
+          staticHtml += `    <h3>${escapeHtml(faq.question || '')}</h3>\n`;
+          staticHtml += `    <p>${escapeHtml(stripHtml(faq.answer || ''))}</p>\n`;
+        });
+      }
+      
+      // Рекламное раскрытие
+      if (content.adDisclosureText) {
+        staticHtml += `    <p><small>${escapeHtml(content.adDisclosureText)}</small></p>\n`;
+      }
+      
+    } else if (pageData) {
+      // Дополнительная страница
+      
+      staticHtml += `    <h1>${escapeHtml(pageData.title || '')}</h1>\n`;
+      
+      // Автор страницы
+      if (pageData.author?.name) {
+        staticHtml += `    <p>Автор: ${escapeHtml(pageData.author.name)}</p>\n`;
+        if (pageData.author.description) {
+          staticHtml += `    <p>${escapeHtml(pageData.author.description)}</p>\n`;
+        }
+      }
+      
+      // Вступительный текст
+      if (pageData.introText) {
+        staticHtml += `    <article>${escapeHtml(stripHtml(pageData.introText))}</article>\n`;
+      }
+      
+      // Блок перед таблицей
+      if (pageData.beforeTableBlock) {
+        if (pageData.beforeTableBlock.title) {
+          staticHtml += `    <h2>${escapeHtml(pageData.beforeTableBlock.title)}</h2>\n`;
+        }
+        if (pageData.beforeTableBlock.paragraphs && pageData.beforeTableBlock.paragraphs.length > 0) {
+          pageData.beforeTableBlock.paragraphs.forEach(p => {
+            staticHtml += `    <p>${escapeHtml(stripHtml(p))}</p>\n`;
+          });
+        }
+      }
+      
+      // Курсы страницы
+      if (pageData.courses && pageData.courses.length > 0) {
+        staticHtml += `    <h2>Курсы</h2>\n    <ul>\n`;
+        pageData.courses.forEach((course, index) => {
+          staticHtml += `      <li>\n`;
+          staticHtml += `        <h3>${index + 1}. ${escapeHtml(course.title || '')}</h3>\n`;
+          staticHtml += `        <p>Школа: ${escapeHtml(course.school || '')}</p>\n`;
+          if (course.price) {
+            staticHtml += `        <p>Цена: ${escapeHtml(String(course.price))} руб.</p>\n`;
+          }
+          if (course.duration) {
+            staticHtml += `        <p>Длительность: ${escapeHtml(course.duration)}</p>\n`;
+          }
+          if (course.features && course.features.length > 0) {
+            staticHtml += `        <ul>\n`;
+            course.features.forEach(feature => {
+              if (feature) {
+                staticHtml += `          <li>${escapeHtml(stripHtml(feature))}</li>\n`;
+              }
+            });
+            staticHtml += `        </ul>\n`;
+          }
+          if (course.advantages && course.advantages.length > 0) {
+            staticHtml += `        <p>Преимущества: ${escapeHtml(course.advantages.join(', '))}</p>\n`;
+          }
+          staticHtml += `      </li>\n`;
+        });
+        staticHtml += `    </ul>\n`;
+      }
+      
+      // Контентные блоки страницы
+      if (pageData.contentBlocks && pageData.contentBlocks.length > 0) {
+        pageData.contentBlocks.forEach(block => {
+          if (block.title) {
+            staticHtml += `    <h2>${escapeHtml(block.title)}</h2>\n`;
+          }
+          if (block.paragraphs && block.paragraphs.length > 0) {
+            block.paragraphs.forEach(p => {
+              staticHtml += `    <p>${escapeHtml(stripHtml(p))}</p>\n`;
+            });
+          }
+        });
+      }
+      
+      // FAQ страницы
+      if (pageData.faqData && pageData.faqData.length > 0) {
+        staticHtml += `    <h2>Часто задаваемые вопросы</h2>\n`;
+        pageData.faqData.forEach(faq => {
+          staticHtml += `    <h3>${escapeHtml(faq.question || '')}</h3>\n`;
+          staticHtml += `    <p>${escapeHtml(stripHtml(faq.answer || ''))}</p>\n`;
+        });
+      }
+    }
+    
+    return staticHtml;
+  };
+
   // Генерация HTML для главной страницы
   const generateMainPageHtml = () => {
     const meta = content.metaData;
     const canonicalUrl = meta.canonicalUrl || 'https://example.com/';
     const ogImage = `${canonicalUrl.replace(/\/$/, '')}/favicon.png`;
+    const staticContent = generateStaticContent(true);
     
     return `<!doctype html>
 <html lang="ru">
@@ -55,6 +253,10 @@ export const SeoHtmlGenerator: React.FC = () => {
     <meta name="author" content="${content.author?.name || 'Автор'}" />
     <meta name="robots" content="index, follow" />
     <meta name="keywords" content="${meta.keywords || ''}" />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -85,6 +287,12 @@ export const SeoHtmlGenerator: React.FC = () => {
 
   <body>
     <div id="root"></div>
+    
+    <!-- SEO: Статический контент для поисковых ботов -->
+    <noscript>
+${staticContent}
+    </noscript>
+    
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>`;
@@ -96,6 +304,7 @@ export const SeoHtmlGenerator: React.FC = () => {
     const baseUrl = content.metaData.canonicalUrl?.replace(/\/$/, '') || 'https://example.com';
     const canonicalUrl = meta.canonicalUrl || `${baseUrl}/${page.slug}`;
     const ogImage = `${baseUrl}/favicon.png`;
+    const staticContent = generateStaticContent(false, page);
     
     // Пути к ресурсам относительно папки slug/
     return `<!doctype html>
@@ -107,6 +316,10 @@ export const SeoHtmlGenerator: React.FC = () => {
     <meta name="description" content="${meta.description || ''}" />
     <meta name="robots" content="index, follow" />
     <meta name="keywords" content="${meta.keywords || ''}" />
+    
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.png" />
@@ -133,6 +346,12 @@ export const SeoHtmlGenerator: React.FC = () => {
 
   <body>
     <div id="root"></div>
+    
+    <!-- SEO: Статический контент для поисковых ботов -->
+    <noscript>
+${staticContent}
+    </noscript>
+    
     <script type="module">
       (async () => {
         const candidates = ["/src/main.tsx", "/assets/app.js"]; // dev → prod
@@ -160,17 +379,17 @@ export const SeoHtmlGenerator: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Инфо-блок */}
-      <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+      <Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
         <CardContent className="pt-6">
           <div className="flex gap-3">
-            <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div className="space-y-2">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Как работают метатеги для поисковиков
+              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                ✅ SEO-оптимизировано для Яндекса и Google
               </p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                Поисковые боты не выполняют JavaScript. Они видят только статический HTML. 
-                Для правильного отображения метатегов нужно создать статические HTML-файлы.
+              <p className="text-sm text-green-700 dark:text-green-300">
+                HTML содержит статический контент внутри <code className="bg-green-100 dark:bg-green-900 px-1 rounded">&lt;noscript&gt;</code>, 
+                который видят поисковые боты: заголовки, описания курсов, FAQ и другой текст.
               </p>
             </div>
           </div>
@@ -192,6 +411,7 @@ export const SeoHtmlGenerator: React.FC = () => {
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">Title: {content.metaData.title?.length || 0} символов</Badge>
             <Badge variant="outline">Description: {content.metaData.description?.length || 0} символов</Badge>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">+ Статический контент</Badge>
             {content.metaData.canonicalUrl && (
               <Badge variant="secondary">{content.metaData.canonicalUrl}</Badge>
             )}
@@ -281,6 +501,7 @@ export const SeoHtmlGenerator: React.FC = () => {
                       <div className="flex flex-wrap gap-2">
                         <Badge variant="outline">Title: {page.metaData.title?.length || 0} символов</Badge>
                         <Badge variant="outline">Description: {page.metaData.description?.length || 0} символов</Badge>
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">+ Статический контент</Badge>
                       </div>
                       
                       <Textarea 
